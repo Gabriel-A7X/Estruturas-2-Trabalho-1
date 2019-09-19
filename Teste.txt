@@ -1,0 +1,8 @@
+%Unit
+Lemon:Limao
+Software:Programa,Aplicacao
+Fire:Fogo
+%Carlota
+Easter_Egg:Ovo_de_Pascoa,Referencia
+Reference:Referencia
+Dark:Trevas
