@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<time.h>
+#include<unistd.h>
 
 struct ingles{
     char *eng;
@@ -48,6 +50,7 @@ void menorInfoDir(arv *raiz, arv **no, arv **paiNo);
 void maiorInfoEsq(arv *raiz, arv **no, arv **paiNo);
 void mostraUnidade(cap *uni, char *p);
 cap* procuraUnidade(cap *uni, char *p, int *certo);
+int procuraPalavra(arv *uni, char *p);
 
 int main(){
     arv *no;
@@ -55,7 +58,7 @@ int main(){
     aux=(cap**)malloc(sizeof(cap*));
     int choice, certo;
     char procura[100], arq[100], unidade[100];
-    
+    clock_t inicio, fim;
     do{
         choice = menu();
         switch(choice){
@@ -65,7 +68,11 @@ int main(){
             printf("Digite o nome do arquivo com a extensao:\n");
             setbuf(stdin, NULL);
             scanf("%s", arq);
+            inicio = (long double)clock();
             lerArquivo(arq, &uni);
+            fim = (long double)clock();
+            long double tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+            printf("Tempo de insercao %Lf\n", tempo);
             break;
         case 2:
             printf("Digite o nome da unidade:\n");
@@ -83,14 +90,35 @@ int main(){
             *aux = procuraUnidade(uni, unidade, &certo);
             if(certo == 1){
                 printf("Digite o nome da palavra:\n");
+                setbuf(stdin, NULL);
                 scanf("%s", procura);
                 arv **pai=(arv**)malloc(sizeof(arv*));
                 *pai=NULL;
                 remove23(&(*aux)->arvore, procura, pai);
-                mostraInOrdem((*aux)->arvore);
             }else{
                 printf("Essa unidade nao existe.\n");
             }
+            break;
+        case 5:
+            certo = 0;
+            printf("Digite o nome da unidade:\n");
+            setbuf(stdin, NULL);
+            scanf("%s", unidade);
+            inicio = (long double)clock();
+            *aux = procuraUnidade(uni, unidade, &certo);
+            fim = (long double)clock();
+            tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+            printf("Tempo de busca da unidade %Lf\n", tempo);
+            if(certo == 1){
+                printf("Digite o nome da palavra:\n");
+                setbuf(stdin, NULL);
+                scanf("%s", procura);
+                inicio = (long double)clock();
+                procuraPalavra((*aux)->arvore, procura);
+                fim = (long double)clock();
+                tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+                printf("Tempo de busca da palavra %Lf\n", tempo);
+             }
             break;
         default:
             printf("Informacao invalida!\n");
@@ -101,7 +129,7 @@ int main(){
 
 int menu(){
     int choice;
-    printf("1-Ler Arquivo\n2-Mostrar Uma Unidade\n3-Mostrar Todas as Unidades\n4-Remover uma Palavra\n0-Sair\n");
+    printf("1-Ler Arquivo\n2-Mostrar Uma Unidade\n3-Mostrar Todas as Unidades\n4-Remover uma Palavra\n5-Buscar Palavra\n0-Sair\n");
     scanf("%d", &choice);
     return choice;
 }
@@ -238,7 +266,6 @@ arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing *promoveL,arv *pa
         *raiz=criaNo(info,ingl,NULL,NULL,NULL);
         aux=NULL;
     }else if(strcmp(info,(*raiz)->info1)==0){
-        printf("%s\n",ingl);
         insereLista(&(*raiz)->l1,ingl);
     }else if((*raiz)->qtd == 2 && strcmp(info,(*raiz)->info2) == 0){
         insereLista(&(*raiz)->l2,ingl);
@@ -596,3 +623,20 @@ cap* procuraUnidade(cap *uni, char *p, int *certo){
     return aux;
 }
 
+int procuraPalavra(arv *uni, char *p){
+    int c = 0;
+    if(uni != NULL){
+        if(strcmp(p, uni->info1) < 0){
+            c = procuraPalavra(uni->esq, p);
+        }else if(strcmp(p, uni->info1) > 0 && strcmp(p, uni->info2) < 0){
+            c = procuraPalavra(uni->cen, p);
+        }else if(strcmp(p, uni->info1) == 0){
+            c = 1;
+        }else if(strcmp(p, uni->info2) > 0){
+            c = procuraPalavra(uni->dir, p);
+        }else if(strcmp(p, uni->info2) == 0){
+            c = 1;
+        }
+    }
+    return c;
+}
