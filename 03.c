@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 struct ingles{
     char eng[50];
@@ -41,13 +43,16 @@ void lerArquivo(char *caminho, cap **uni);
 void mostraTodasUnidades(cap *uni);
 void mostraUnidade(cap *uni, char *p);
 void mostraEmOrdem(arv *raiz);
-arv* procuraUnidade(cap *uni, char *p, int *certo);
+cap* procuraUnidade(cap *uni, char *p, int *certo);
+int procuraPalavra(arv *uni, char *p);
 
 void main(){
-    arv *no, *aux;
-    cap *uni = NULL;
+    arv *no;
+    cap *uni = NULL, **aux;
     int choice, certo;
     char procura[100], arq[100], unidade[100];
+    clock_t inicio, fim;
+    long double tempo;
     do{
         choice = menu();
         switch(choice){
@@ -57,7 +62,11 @@ void main(){
             printf("Digite o nome do arquivo com a extensao:\n");
             setbuf(stdin, NULL);
             scanf("%s", arq);
+            inicio = (long double)clock();
             lerArquivo(arq, &uni);
+            fim = (long double)clock();
+            tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+            printf("Tempo de insercao %Lf\n", tempo);
             break;
         case 2:
             printf("Digite o nome da unidade:\n");
@@ -73,15 +82,42 @@ void main(){
             printf("Digite o nome da unidade:\n");
             setbuf(stdin, NULL);
             scanf("%s", unidade);
-            aux = procuraUnidade(uni, unidade, &certo);
+            printf("Aqui\n");
+            *aux = procuraUnidade(uni, unidade, &certo);
+            printf("Aqui2\n");
             if(certo == 1){
                 printf("Digite o nome da palavra:\n");
                 setbuf(stdin, NULL);
                 scanf("%s", procura);
-                removeNo(&aux, procura);
+                removeNo(&(*aux)->arvore, procura);
             }else{
                 printf("Essa unidade nao existe.\n");
             }
+            break;
+        case 5:
+            certo = 0;
+            printf("Digite o nome da unidade:\n");
+            setbuf(stdin, NULL);
+            scanf("%s", unidade);
+            inicio = (long double)clock();
+            *aux = procuraUnidade(uni, unidade, &certo);
+            fim = (long double)clock();
+            tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+            printf("Tempo de busca da unidade %Lf\n", tempo);
+            if(certo == 1){
+                printf("Digite o nome da palavra:\n");
+                setbuf(stdin, NULL);
+                scanf("%s", procura);
+                inicio = (long double)clock();
+                if(procuraPalavra((*aux)->arvore, procura) == 1){
+                    printf("Palavra Encontrada!\n");
+                }else{
+                    printf("Palavra nao encontrada!\n");
+                }
+                fim = (long double)clock();
+                tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+                printf("Tempo de busca da palavra %Lf\n", tempo);
+             }
             break;
         default:
             printf("Informacao invalida!\n");
@@ -92,7 +128,7 @@ void main(){
 
 int menu(){
     int choice;
-    printf("1-Ler Arquivo\n2-Mostrar Uma Unidade\n3-Mostrar Todas as Unidades\n4-Remover uma Palavra\n0-Sair\n");
+    printf("1-Ler Arquivo\n2-Mostrar Uma Unidade\n3-Mostrar Todas as Unidades\n4-Remover uma Palavra\n5-Procura uma Palavra\n0-Sair\n");
     scanf("%d", &choice);
     return choice;
 }
@@ -297,15 +333,27 @@ void mostraUnidade(cap *uni, char *p){
     }
 }
 
-arv* procuraUnidade(cap *uni, char *p, int *certo){
-    arv  *caca;
+cap* procuraUnidade(cap *uni, char *p, int *certo){
     cap *aux=uni;
     for(uni; aux != NULL; aux=aux->prox){
         if(strcmp(aux->unidade, p) == 0){
-            caca = aux->arvore;
             *certo = 1;
             break;
         }
     }
-    return caca;
+    return aux;
+}
+
+int procuraPalavra(arv *uni, char *p){
+    int c = 0;
+    if(uni != NULL){
+        if(strcmp(p, uni->port) < 0){
+            c = procuraPalavra(uni->esq, p);
+        }else if(strcmp(p, uni->port) > 0){
+            c = procuraPalavra(uni->dir, p);
+        }else if(strcmp(p, uni->port) == 0){
+            c = 1;
+        }
+    }
+    return c;
 }
