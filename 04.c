@@ -47,11 +47,12 @@ void copiaLista(ing **lista, ing *lis);
 void menorInfoDir(arv *raiz, arv **no, arv **paiNo);
 void maiorInfoEsq(arv *raiz, arv **no, arv **paiNo);
 void mostraUnidade(cap *uni, char *p);
-arv* procuraUnidade(cap *uni, char *p, int *certo);
+cap* procuraUnidade(cap *uni, char *p, int *certo);
 
 int main(){
-    arv *no, *aux;
-    cap *uni = NULL;
+    arv *no;
+    cap *uni = NULL, **aux;
+    aux=(cap**)malloc(sizeof(cap*));
     int choice, certo;
     char procura[100], arq[100], unidade[100];
     
@@ -79,13 +80,14 @@ int main(){
             printf("Digite o nome da unidade:\n");
             setbuf(stdin, NULL);
             scanf("%s", unidade);
-            aux = procuraUnidade(uni, unidade, &certo);
+            *aux = procuraUnidade(uni, unidade, &certo);
             if(certo == 1){
                 printf("Digite o nome da palavra:\n");
                 scanf("%s", procura);
                 arv **pai=(arv**)malloc(sizeof(arv*));
                 *pai=NULL;
-                remove23(&aux, procura, pai);
+                remove23(&(*aux)->arvore, procura, pai);
+                mostraInOrdem((*aux)->arvore);
             }else{
                 printf("Essa unidade nao existe.\n");
             }
@@ -323,8 +325,8 @@ void lerArquivo(char *caminho, cap **uni){
     }else{
         printf("Arquivo aberto com sucesso!\n");
     }
+    fscanf(fptr, "%s", palavras);
     while (!feof(fptr)){
-        fscanf(fptr, "%s", palavras);
         j = 0;
         if(palavras[0] == '%'){
             for(i=1; palavras[i] != '\0'; i++){
@@ -354,6 +356,7 @@ void lerArquivo(char *caminho, cap **uni){
             insere(&(*uni)->arvore, nome, ingles, promove, proLista, NULL);
             proLista = NULL;
         }
+        fscanf(fptr, "%s", palavras);
     }
 }
 
@@ -384,7 +387,8 @@ void maiorInfoEsq(arv *raiz, arv **no, arv **paiNo){
 
 int remove23(arv **raiz, char *pal, arv **pai){
     int removeu = 0;
-    arv *no = NULL, *no1, *paiNo = NULL, *paiNo1 = NULL, *aux;
+    arv *no = NULL, *no1, *paiNo = NULL, *paiNo1 = NULL, **aux;
+    aux=(arv**) malloc(sizeof(arv*));
     no1 = (arv*) malloc(sizeof(arv));
     if(*raiz != NULL){
         if(efolha(*raiz)){
@@ -433,7 +437,8 @@ int remove23(arv **raiz, char *pal, arv **pai){
                             (*raiz)->qtd = 2;
                             apagarLista(&no->l1);
                             free(no);
-                            (*pai) = *raiz;
+                            *pai = *raiz;
+                            printf("aq\n");
                         }else{
                             strcpy(no->info1,paiNo->info2);
                             apagarLista(&no->l1);
@@ -482,11 +487,15 @@ int remove23(arv **raiz, char *pal, arv **pai){
                             strcpy(((*pai)->esq)->info2, (*pai)->info1);
                             apagarLista(&((*pai)->esq)->l2);
                             copiaLista(&((*pai)->esq)->l2, (*pai)->l1);
+                            apagarLista(&(*raiz)->l1);
+                            apagarLista(&(*raiz)->l2);
                             free(*raiz);
                             ((*pai)->esq)->qtd = 2;
-                            aux = (*pai)->esq;
+                            *aux = (*pai)->esq;
+                            apagarLista(&(*pai)->l1);
+                            apagarLista(&(*pai)->l1);
                             free(*pai);
-                            *pai = aux;
+                            *pai = *aux;
                         }
                     }else{
                         strcpy((*raiz)->info1, (*pai)->info2);
@@ -552,7 +561,11 @@ int remove23(arv **raiz, char *pal, arv **pai){
                 strcpy((*raiz)->info1,no->info1);
                 apagarLista(&(*raiz)->l1);
                 copiaLista(&(*raiz)->l1, no->l1);
+                mostraInOrdem(*raiz);
+                printf("\n\n");
                 remove23(&(*raiz)->cen, (*raiz)->info1, raiz);
+                printf("\n\n");
+                mostraInOrdem(*raiz);
                 removeu = 1;
             }else if((*raiz)->qtd == 1 || strcmp(pal, (*raiz)->info2)<0){
                 removeu = remove23(&(*raiz)->cen, pal, raiz);
@@ -572,16 +585,14 @@ int remove23(arv **raiz, char *pal, arv **pai){
     return removeu;
 }
 
-arv* procuraUnidade(cap *uni, char *p, int *certo){
-    arv *caca = 0;
+cap* procuraUnidade(cap *uni, char *p, int *certo){
     cap *aux=uni;
     for(uni; aux != NULL; aux=aux->prox){
         if(strcmp(aux->unidade, p) == 0){
-            caca = aux->arvore;
             *certo = 1;
             break;
         }
     }
-    return caca;
+    return aux;
 }
 

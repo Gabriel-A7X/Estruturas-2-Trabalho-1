@@ -3,3 +3,13 @@ software:programa,aplicação
 lemon:limao
 juice:suco
 school:escola
+%unidad
+brush:escova,pincel
+together:juntos
+assemble:juntos
+shallow:raso
+now:agora
+%unidade
+Beauty:lindo,bonito,fabuloso
+ugly:feio,horrendo
+strange:estranho,forasteiro
