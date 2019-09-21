@@ -70,7 +70,7 @@ int main(){
         case 3:
             printf("Digite o nome da palavra:\n");
             scanf("%s", procura);
-            //removeNo(&uni->arvore, procura);
+            removeNo(&uni->arvore, procura);
             break;
         default:
             printf("Informacao invalida!\n");
@@ -379,16 +379,16 @@ int remove23(arv **raiz, char *pal, arv **pai){
         if(efolha(*raiz)){
             if((*raiz)->qtd == 2){
                 if(strcmp(pal, (*raiz)->info2) == 0){
-                    strcpy((*raiz)->info2, '');
-                    apagarLista((*raiz)->l2);
+                    strcpy((*raiz)->info2, " ");
+                    apagarLista(&(*raiz)->l2);
                     (*raiz)->qtd = 1;
                     removeu = 1;
                 }else if(strcmp(pal, (*raiz)->info1) == 0){
                     strcpy((*raiz)->info1, (*raiz)->info2);
-                    apagarLista((*raiz)->l1);
+                    apagarLista(&(*raiz)->l1);
                     copiaLista(&(*raiz)->l1, (*raiz)->l2);
-                    apagarLista((*raiz)->l2);
-                    strcpy((*raiz)->info2, '');
+                    apagarLista(&(*raiz)->l2);
+                    strcpy((*raiz)->info2, " ");
                     (*raiz)->qtd = 1;
                     removeu = 1;
                 }
@@ -399,24 +399,26 @@ int remove23(arv **raiz, char *pal, arv **pai){
                     removeu = 1;
                 }else if(*raiz == (*pai)->esq){
                     strcpy((*raiz)->info1, (*pai)->info1);
-                    apagarLista((*raiz)->l1);
+                    apagarLista(&(*raiz)->l1);
                     copiaLista(&(*raiz)->l1, (*pai)->l1);
                     paiNo = *pai;
                     menorInfoDir((*pai)->cen, &no, &paiNo);
                     strcpy((*pai)->info1, no->info1);
-                    apagarLista((*pai)->l1);
-                    copiaLista((*pai)->l1, no->l1);
+                    apagarLista(&(*pai)->l1);
+                    copiaLista(&(*pai)->l1, no->l1);
                     removeu = 1;
                     if(no->qtd == 2){
                         strcpy(no->info1,no->info2);
-                        apagarLista(no->l1);
+                        apagarLista(&no->l1);
                         copiaLista(&no->l1, no->l2);
-                        strcpy(no->info2,'');
-                        apagarLista(no->l2);
+                        strcpy(no->info2," ");
+                        apagarLista(&no->l2);
                         no->qtd = 1;
                     }else{
                         if(paiNo->qtd == 1){
                             strcpy((*raiz)->info2, no->info1);
+                            apagarLista(&(*raiz)->l2);
+                            copiaLista(&(*raiz)->l2,no->l1);
                             (*raiz)->qtd = 2;
                             apagarLista(&no->l1);
                             free(no);
@@ -434,18 +436,20 @@ int remove23(arv **raiz, char *pal, arv **pai){
                                 strcpy(no1->info1,no1->info2);
                                 apagarLista(&no1->l1);
                                 copiaLista(&no1->l1,no1->l2);
-                                strcpy(no1->info2,'');
-                                apagarLista(no1->l2);
+                                strcpy(no1->info2, " ");
+                                apagarLista(&no1->l2);
                                 no1->qtd = 1;
                             }else{
                                 strcpy(no->info2,paiNo->info2);
-                                apagarLista(no->l2);
-                                copiaLista(no->l2,paiNo->l2);
+                                apagarLista(&no->l2);
+                                copiaLista(&no->l2,paiNo->l2);
                                 no->qtd=2;
-                                strcpy(paiNo->info2,'');
+                                strcpy(paiNo->info2, " ");
                                 apagarLista(&paiNo->l2);
                                 paiNo->qtd = 1;
-                                free(paiNo1->dir);
+                                apagarLista(&no1->l1);
+                                apagarLista(&no1->l2);
+                                free(no1);
                                 paiNo1->dir = NULL;
                             }
                         }
@@ -455,18 +459,18 @@ int remove23(arv **raiz, char *pal, arv **pai){
                     if((*pai)->qtd == 1){
                         if(((*pai)->esq)->qtd == 2){
                             strcpy((*raiz)->info1, (*pai)->info1);
-                            apagarLista((*raiz)->l1);
-                            copiaLista((*raiz)->l1, (*pai)->l1);
+                            apagarLista(&(*raiz)->l1);
+                            copiaLista(&(*raiz)->l1, (*pai)->l1);
                             strcpy((*pai)->info1, ((*pai)->esq)->info2);
-                            apagarLista((*pai)->l1);
-                            copiaLista((*pai)->l1, ((*pai)->esq)->l2);
-                            strcpy((*pai)->esq)->info2, '');
-                            apagarLista((*pai)->esq)->l2);
+                            apagarLista(&(*pai)->l1);
+                            copiaLista(&(*pai)->l1, ((*pai)->esq)->l2);
+                            strcpy(((*pai)->esq)->info2, " ");
+                            apagarLista(&((*pai)->esq)->l2);
                             ((*pai)->esq)->qtd = 1;
                         }else{
                             strcpy(((*pai)->esq)->info2, (*pai)->info1);
-                            apagarLista(((*pai)->esq)->info2);
-                            copiaLista(((*pai)->esq)->l2, (*pai)->l1);
+                            apagarLista(&((*pai)->esq)->l2);
+                            copiaLista(&((*pai)->esq)->l2, (*pai)->l1);
                             free(*raiz);
                             ((*pai)->esq)->qtd = 2;
                             aux = (*pai)->esq;
@@ -475,25 +479,27 @@ int remove23(arv **raiz, char *pal, arv **pai){
                         }
                     }else{
                         strcpy((*raiz)->info1, (*pai)->info2);
-                        apagarLista((*raiz)->l1);
-                        copiaLista((*raiz)->l1, (*pai)->l2);
+                        apagarLista(&(*raiz)->l1);
+                        copiaLista(&(*raiz)->l1, (*pai)->l2);
                         paiNo = *pai;
                         menorInfoDir((*pai)->dir, &no, &paiNo);
                         strcpy((*pai)->info2, no->info1);
+                        apagarLista(&(*pai)->l2);
+                        copiaLista(&(*pai)->l2,no->l1);
                         if(no->qtd == 2){
                             strcpy(no->info1, no->info2);
-                            apagarLista(no->l1);
-                            copiaLista(no->l1, no->l2);
-                            strcpy(no->info2, '');
-                            apagarLista(no->l2);
+                            apagarLista(&no->l1);
+                            copiaLista(&no->l1, no->l2);
+                            strcpy(no->info2, " ");
+                            apagarLista(&no->l2);
                             no->qtd = 1;
                         }else{
                             (*raiz)->qtd = 2;
                             strcpy((*raiz)->info2, (*pai)->info2);
-                            apagarLista((*raiz)->l2);
-                            copiaLista((*raiz)->l2, (*pai)->l2);
-                            strcpy((*pai)->info2, '');
-                            apagarLista((*pai)->l2);
+                            apagarLista(&(*raiz)->l2);
+                            copiaLista(&(*raiz)->l2, (*pai)->l2);
+                            strcpy((*pai)->info2, " ");
+                            apagarLista(&(*pai)->l2);
                             (*pai)->qtd = 1;
                             free(no);
                             (*pai)->dir = NULL;
@@ -503,41 +509,48 @@ int remove23(arv **raiz, char *pal, arv **pai){
                     removeu = 1;
                     paiNo = *pai;
                     maiorInfoEsq((*pai)->cen, &no, &paiNo);
-                    strcpy(pal, no->info1);
                     if(no->qtd == 1){
                         strcpy(no->info2, (*pai)->info2);
-                        apagarLista(no->l2);
-                        copiaLista(no->l2, (*pai)->l2);
-                        strcpy((*pai)->info2, '');
-                        apagarLista((*pai)->l2);
+                        apagarLista(&no->l2);
+                        copiaLista(&no->l2, (*pai)->l2);
+                        strcpy((*pai)->info2, " ");
+                        apagarLista(&(*pai)->l2);
                         (*pai)->qtd = 1;
                         no->qtd = 2;
                         free(*raiz);
                         *raiz = NULL;
                     }else{
                         strcpy((*raiz)->info1, (*pai)->info2);
-                        apagarLista();
-                        copiaLista((*raiz)->l1, (*pai)->l2);
-                        strcpy((*pai)->info2, pal);
-                        strcpy(no->info2, '');
-                        apagarLista(no->l2);
+                        apagarLista(&(*raiz)->l1);
+                        copiaLista(&(*raiz)->l1, (*pai)->l2);
+                        strcpy((*pai)->info2, no->info2);
+                        apagarLista(&(*pai)->l2);
+                        copiaLista(&(*pai)->l2,no->l2);
+                        strcpy(no->info2, " ");
+                        apagarLista(&no->l2);
                         no->qtd = 1;
                     }
                 }
             }
         }else{
-            if(pal < (*raiz)->info1){
+            if(strcmp(pal, (*raiz)->info1)<0){
                 removeu = remove23(&(*raiz)->esq, pal, raiz);
-            }else if(pal == (*raiz)->info1){
+            }else if(strcmp(pal, (*raiz)->info1)==0){
                 paiNo = *raiz;
-                (*raiz)->info1 = menorInfoDir((*raiz)->cen, &no, &paiNo);
+                menorInfoDir((*raiz)->cen, &no, &paiNo);
+                strcpy((*raiz)->info1,no->info1);
+                apagarLista(&(*raiz)->l1);
+                copiaLista(&(*raiz)->l1, no->l1);
                 remove23(&(*raiz)->cen, (*raiz)->info1, raiz);
                 removeu = 1;
-            }else if((*raiz)->qtd == 1 || pal < (*raiz)->info2){
+            }else if((*raiz)->qtd == 1 || strcmp(pal, (*raiz)->info2)<0){
                 removeu = remove23(&(*raiz)->cen, pal, raiz);
             }else if(pal == (*raiz)->info2){
                 paiNo = *pai;
-                (*raiz)->info2 = menorInfoDir((*pai)->dir, &no, &paiNo);
+                menorInfoDir((*pai)->dir, &no, &paiNo);
+                strcpy((*raiz)->info2,no->info1);
+                apagarLista(&(*raiz)->l2);
+                copiaLista(&(*raiz)->l2, no->l1);
                 remove23(&(*raiz)->dir, (*raiz)->info2, raiz);
                 removeu = 1;
             }else{
