@@ -59,6 +59,7 @@ int main(){
     int choice, certo;
     char procura[100], arq[100], unidade[100];
     clock_t inicio, fim;
+    long double tempo;
     do{
         choice = menu();
         switch(choice){
@@ -71,7 +72,7 @@ int main(){
             inicio = (long double)clock();
             lerArquivo(arq, &uni);
             fim = (long double)clock();
-            long double tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+            tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
             printf("Tempo de insercao %Lf\n", tempo);
             break;
         case 2:
