@@ -114,7 +114,11 @@ int main(){
                 setbuf(stdin, NULL);
                 scanf("%s", procura);
                 inicio = (long double)clock();
-                procuraPalavra((*aux)->arvore, procura);
+                if(procuraPalavra((*aux)->arvore, procura) == 1){
+                    printf("Palavra Encontrada!\n");
+                }else{
+                    printf("Palavra nao encontrada!\n");
+                }
                 fim = (long double)clock();
                 tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
                 printf("Tempo de busca da palavra %Lf\n", tempo);
