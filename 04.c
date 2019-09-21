@@ -38,7 +38,6 @@ arv *adcNO(arv *no,char *info,ing *lis,arv *filho);
 int efolha(arv *no);
 arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing *promoveL,arv *pai);
 void mostraInOrdem(arv *raiz);
-void mostraPreOrdem(arv *raiz);
 void Mostrar(cap *uni);
 void lerArquivo(char *caminho, cap **uni);
 void *inserirCapitulo(cap **uni, char *nome);
@@ -47,32 +46,49 @@ void apagarLista(ing **lista);
 void copiaLista(ing **lista, ing *lis);
 void menorInfoDir(arv *raiz, arv **no, arv **paiNo);
 void maiorInfoEsq(arv *raiz, arv **no, arv **paiNo);
+void mostraUnidade(cap *uni, char *p);
+arv* procuraUnidade(cap *uni, char *p, int *certo);
 
 int main(){
-    arv *no;
+    arv *no, *aux;
     cap *uni = NULL;
-    int choice;
-    char procura[100];
-    lerArquivo("Teste.txt", &uni);
+    int choice, certo;
+    char procura[100], arq[100], unidade[100];
+    
     do{
         choice = menu();
         switch(choice){
         case 0:
             break;
         case 1:
-            printf("Digite o nome da unidade:\n");
-            scanf("%s", procura);
-            //procuraUnidade(uni, procura);
+            printf("Digite o nome do arquivo com a extensao:\n");
+            setbuf(stdin, NULL);
+            scanf("%s", arq);
+            lerArquivo(arq, &uni);
             break;
         case 2:
-            Mostrar(uni);
+            printf("Digite o nome da unidade:\n");
+            scanf("%s", procura);
+            mostraUnidade(uni, procura);
             break;
         case 3:
-            printf("Digite o nome da palavra:\n");
-            scanf("%s", procura);
-            arv **pai=(arv**)malloc(sizeof(arv*));
-            *pai=NULL;
-            remove23(&uni->arvore, procura, pai);
+            Mostrar(uni);
+            break;
+        case 4:
+            certo = 0;
+            printf("Digite o nome da unidade:\n");
+            setbuf(stdin, NULL);
+            scanf("%s", unidade);
+            aux = procuraUnidade(uni, unidade, &certo);
+            if(certo == 1){
+                printf("Digite o nome da palavra:\n");
+                scanf("%s", procura);
+                arv **pai=(arv**)malloc(sizeof(arv*));
+                *pai=NULL;
+                remove23(&aux, procura, pai);
+            }else{
+                printf("Essa unidade nao existe.\n");
+            }
             break;
         default:
             printf("Informacao invalida!\n");
@@ -83,7 +99,7 @@ int main(){
 
 int menu(){
     int choice;
-    printf("1-Mostrar Uma Unidade\n2-Mostrar Todas as Unidades\n3-Remover uma Palavra\n0-Sair\n");
+    printf("1-Ler Arquivo\n2-Mostrar Uma Unidade\n3-Mostrar Todas as Unidades\n4-Remover uma Palavra\n0-Sair\n");
     scanf("%d", &choice);
     return choice;
 }
@@ -272,20 +288,13 @@ void mostraInOrdem(arv *raiz){
     }
 }
 
-void mostraPreOrdem(arv *raiz){
-    if(raiz!=NULL){
-        printf("<");
-        printf("%s | ",raiz->info1);
-        if(raiz->qtd == 2){
-            printf("%s | ",raiz->info2);
-            mostraPreOrdem(raiz->esq);
-            mostraPreOrdem(raiz->cen);
-            mostraPreOrdem(raiz->dir);
-        }else{
-            mostraPreOrdem(raiz->esq);
-            mostraPreOrdem(raiz->cen);
+void mostraUnidade(cap *uni, char *p){
+    cap *aux=uni;
+    for(uni; aux != NULL; aux=aux->prox){
+        if(strcmp(aux->unidade, p) == 0){
+            printf("Unidade: %s\n", aux->unidade);
+            mostraInOrdem(aux->arvore);
         }
-        printf(">");
     }
 }
 
@@ -310,7 +319,7 @@ void lerArquivo(char *caminho, cap **uni){
     fptr = fopen(caminho, "r");
     if( fptr == NULL ){
         printf("Erro na abertura de arquivo!\n");
-        exit(1);        
+        return;        
     }else{
         printf("Arquivo aberto com sucesso!\n");
     }
@@ -562,3 +571,17 @@ int remove23(arv **raiz, char *pal, arv **pai){
     }
     return removeu;
 }
+
+arv* procuraUnidade(cap *uni, char *p, int *certo){
+    arv *caca = 0;
+    cap *aux=uni;
+    for(uni; aux != NULL; aux=aux->prox){
+        if(strcmp(aux->unidade, p) == 0){
+            caca = aux->arvore;
+            *certo = 1;
+            break;
+        }
+    }
+    return caca;
+}
+

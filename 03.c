@@ -30,7 +30,6 @@ void *inserirCapitulo(cap **uni, char *nome);
 ing *criaPalavra(char *p);
 int eFolha(arv *no);
 void insereArv(arv **raiz, arv *no);
-void mostraPreOrdem(arv *raiz);
 void insereLista(ing **palavra, char *p);
 void mostraLista(ing *lista);
 void apagarLista(ing **lista);
@@ -40,15 +39,15 @@ void removeNo(arv **raiz, char *p);
 int menu();
 void lerArquivo(char *caminho, cap **uni);
 void mostraTodasUnidades(cap *uni);
-void mostraUnidade(cap *uni);
-void procuraUnidade(cap *uni, char *p);
-
+void mostraUnidade(cap *uni, char *p);
+void mostraEmOrdem(arv *raiz);
+arv* procuraUnidade(cap *uni, char *p, int *certo);
 
 void main(){
-    arv *no;
+    arv *no, *aux;
     cap *uni = NULL;
-    int choice;
-    char procura[100], arq[100];
+    int choice, certo;
+    char procura[100], arq[100], unidade[100];
     do{
         choice = menu();
         switch(choice){
@@ -58,20 +57,31 @@ void main(){
             printf("Digite o nome do arquivo com a extensao:\n");
             setbuf(stdin, NULL);
             scanf("%s", arq);
-            lerArquivo("Teste.txt", &uni);
+            lerArquivo(arq, &uni);
             break;
         case 2:
             printf("Digite o nome da unidade:\n");
+            setbuf(stdin, NULL);
             scanf("%s", procura);
-            procuraUnidade(uni, procura);
+            mostraUnidade(uni, procura);
             break;
         case 3:
             mostraTodasUnidades(uni);
             break;
         case 4:
-            printf("Digite o nome da palavra:\n");
-            scanf("%s", procura);
-            removeNo(&uni->arvore, procura);
+            certo = 0;
+            printf("Digite o nome da unidade:\n");
+            setbuf(stdin, NULL);
+            scanf("%s", unidade);
+            aux = procuraUnidade(uni, unidade, &certo);
+            if(certo == 1){
+                printf("Digite o nome da palavra:\n");
+                setbuf(stdin, NULL);
+                scanf("%s", procura);
+                removeNo(&aux, procura);
+            }else{
+                printf("Essa unidade nao existe.\n");
+            }
             break;
         default:
             printf("Informacao invalida!\n");
@@ -120,13 +130,14 @@ void insereArv(arv **raiz, arv *no){
     }
 }
 
-void mostraPreOrdem(arv *raiz){
+
+void mostraEmOrdem(arv *raiz){
     if(raiz != NULL){
+        mostraEmOrdem(raiz->esq);
         printf("%s | ", raiz->port);
         mostraLista(raiz->palavras);
         printf("\n");
-        mostraPreOrdem(raiz->esq);
-        mostraPreOrdem(raiz->dir);
+        mostraEmOrdem(raiz->dir);
     }
 }
 
@@ -232,7 +243,7 @@ void lerArquivo(char *caminho, cap **uni){
     fptr = fopen(caminho, "r");
     if( fptr == NULL ){
         printf("Erro na abertura de arquivo!\n");
-        exit(1);        
+        return;        
     }else{
         printf("Arquivo aberto com sucesso!\n");
     }
@@ -271,18 +282,30 @@ void lerArquivo(char *caminho, cap **uni){
 void mostraTodasUnidades(cap *uni){
     if(uni != NULL){
         printf("Unidade: %s\n", uni->unidade);
-        mostraPreOrdem(uni->arvore);
+        mostraEmOrdem(uni->arvore);
         mostraTodasUnidades(uni->prox);
     }
 }
 
-void procuraUnidade(cap *uni, char *p){
-    int valor, i;
+void mostraUnidade(cap *uni, char *p){
     cap *aux=uni;
     for(uni; aux != NULL; aux=aux->prox){
         if(strcmp(aux->unidade, p) == 0){
             printf("Unidade: %s\n", aux->unidade);
-            mostraPreOrdem(aux->arvore);
+            mostraEmOrdem(aux->arvore);
         }
     }
+}
+
+arv* procuraUnidade(cap *uni, char *p, int *certo){
+    arv  *caca;
+    cap *aux=uni;
+    for(uni; aux != NULL; aux=aux->prox){
+        if(strcmp(aux->unidade, p) == 0){
+            caca = aux->arvore;
+            *certo = 1;
+            break;
+        }
+    }
+    return caca;
 }
