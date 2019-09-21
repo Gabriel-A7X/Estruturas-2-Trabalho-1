@@ -70,7 +70,9 @@ int main(){
         case 3:
             printf("Digite o nome da palavra:\n");
             scanf("%s", procura);
-            removeNo(&uni->arvore, procura);
+            arv **pai=(arv**)malloc(sizeof(arv*));
+            *pai=NULL;
+            remove23(&uni->arvore, procura, pai);
             break;
         default:
             printf("Informacao invalida!\n");

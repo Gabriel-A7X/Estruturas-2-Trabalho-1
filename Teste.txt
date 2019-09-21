@@ -1,0 +1,5 @@
+%unity
+software:programa,aplicação
+lemon:limao
+juice:suco
+school:escola
