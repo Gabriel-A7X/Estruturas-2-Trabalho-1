@@ -31,7 +31,7 @@ void main(){
     No *raiz = NULL, *no;
     int i, j, sort, procura = (rand() % 1000) + 1, *difProf, maisProf, menosProf;
     clock_t inicio, fim;
-    difProf = (int*) calloc(sizeof(int), 40);
+    difProf = (int*) calloc(sizeof(int), 100);
     for(i=0; i<30; i++){
         inicio = (long double)clock();
         for(j=0; j<1000; j++){
@@ -51,10 +51,11 @@ void main(){
         fim = (long double)clock();
         tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
         printf("Tempo de busca %Lf\n", tempo);
-        libera(&raiz);
+	libera(&raiz);
+	raiz=NULL;
     }
     printf("Diferencas entre profundidades maximas e minimas:\n");
-    for(i=0; i<40; i++){
+    for(i=0; i<100; i++){
         if(difProf[i] != 0){
             printf("A diferenca %d ocorreu %d.\n", i, difProf[i]);
         }
@@ -109,7 +110,7 @@ void trocaCor(No *h){
 
 No* balancear(No *h){
     //Nó vermelho é sempre filho da esquerda.
-    if(cor(h->dir) == 0){
+    if(cor(h->dir) == 0 && cor(h->esq) == 1){
         h = rotacaoEsquerda(h);
     }
     //Filho da direita e neto esquerda são vermelhos.

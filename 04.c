@@ -38,7 +38,7 @@ arv *criaNoL(char *port,ing *ingl,arv *esq,arv *cen,arv *dir);
 arv *quebraNo(arv **raiz,char *info,ing *ingl,char *promovePal,ing **promoveL,arv *sub);
 arv *adcNO(arv *no,char *info,ing *lis,arv *filho);
 int efolha(arv *no);
-arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing *promoveL,arv *pai);
+arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing **promoveL,arv *pai);
 void mostraInOrdem(arv *raiz);
 void Mostrar(cap *uni);
 void lerArquivo(char *caminho, cap **uni);
@@ -195,7 +195,7 @@ arv *criaNoL(char *port,ing *ingl,arv *esq,arv *cen,arv *dir){
     no->info1=(char*)malloc(sizeof(char)*100);
     no->info2=(char*)malloc(sizeof(char)*100);
     strcpy(no->info1,port);
-    no->l1=ingl;
+    copiaLista(&no->l1,ingl);
     no->l2=NULL;
     no->qtd=1;
     no->esq=esq;
@@ -208,29 +208,34 @@ arv *quebraNo(arv **raiz,char *info,ing *ingl,char *promovePal,ing **promoveL,ar
     arv *aux;
     if(strcmp(info,(*raiz)->info1)<0){
         strcpy(promovePal,(*raiz)->info1);
-        *promoveL=(*raiz)->l1;
-        (*raiz)->l1=ingl;
+        apagarLista(promoveL);
+        copiaLista(promoveL,(*raiz)->l1);
         strcpy((*raiz)->info1,info);
+        apagarLista(&(*raiz)->l1);
+        copiaLista(&(*raiz)->l1,ingl);
         (*raiz)->qtd-=1;
         aux=criaNoL((*raiz)->info2,(*raiz)->l2,(*raiz)->cen,(*raiz)->dir,NULL);
         (*raiz)->l2=NULL;
-        (*raiz)->cen=sub;
         (*raiz)->dir=NULL;
+        (*raiz)->cen=sub;
     }else if(strcmp(info,(*raiz)->info2)<0){
         strcpy(promovePal,info);
-        *promoveL=ingl;
+        apagarLista(promoveL);
+        copiaLista(promoveL,ingl);
         (*raiz)->qtd-=1;
-        aux=criaNoL((*raiz)->info2,(*raiz)->l2,(*raiz)->cen,(*raiz)->dir,NULL);
+        aux=criaNoL((*raiz)->info2,(*raiz)->l2,sub,(*raiz)->dir,NULL);
+
         (*raiz)->l2=NULL;
-        (*raiz)->cen=sub;
         (*raiz)->dir=NULL;
     }else{
-       strcpy(promovePal,(*raiz)->info2);
-        *promoveL=(*raiz)->l2;
+        strcpy(promovePal,(*raiz)->info2);
+        apagarLista(promoveL);
+        *promoveL=NULL;
+        copiaLista(promoveL,(*raiz)->l2);
+        apagarLista(&(*raiz)->l2);
         (*raiz)->qtd-=1;
-        aux=criaNoL(info,ingl,(*raiz)->cen,(*raiz)->dir,NULL);
+        aux=criaNoL(info,ingl,(*raiz)->dir,sub,NULL);
         (*raiz)->l2=NULL;
-        (*raiz)->cen=sub;
         (*raiz)->dir=NULL;
     }
     return aux;
@@ -261,10 +266,10 @@ int efolha(arv *no){
     return r;
 }
 
-arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing *promoveL,arv *pai){
+arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing **promoveL,arv *pai){
     arv *aux = NULL;
     ing *aux2=NULL;
-    if(promoveL==NULL){
+    if(*promoveL==NULL){
         insereLista(&aux2,ingl);
     }    
     if(*raiz == NULL){
@@ -279,7 +284,7 @@ arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing *promoveL,arv *pa
             *raiz=adcNO(*raiz,info,aux2,NULL);
             aux=NULL;
         }else{
-            aux=quebraNo(raiz,info,aux2,promove,&promoveL,NULL);
+            aux=quebraNo(raiz,info,aux2,promove,promoveL,NULL);
         }
     }else{
         if(strcmp(info,(*raiz)->info1)<0){
@@ -291,14 +296,18 @@ arv *insere(arv **raiz,char *info,char *ingl,char *promove,ing *promoveL,arv *pa
         }
     }
     if(aux!=NULL){
+        char *copia=(char*)malloc(sizeof(char)*100);
+        strcpy(copia,promove);
+        ing *lista=NULL;
+        copiaLista(&lista,*promoveL);
         if(pai==NULL){
-            *raiz=criaNoL(promove,promoveL,*raiz,aux,NULL);
+            *raiz=criaNoL(promove,*promoveL,*raiz,aux,NULL);
             aux=NULL;
         }else if(pai->qtd==1){
-            pai=adcNO(pai,promove,promoveL,aux);
+            pai=adcNO(pai,promove,*promoveL,aux);
             aux=NULL;
         }else{
-            aux=quebraNo(&pai,promove,promoveL,promove,&promoveL,aux);
+            aux=quebraNo(&pai,copia,lista,promove,promoveL,aux);
         }
     }
     return aux;
@@ -379,13 +388,13 @@ void lerArquivo(char *caminho, cap **uni){
                 j++;
                 if(palavras[i] == ','){
                     nome[j-1] = '\0';
-                    insere(&(*uni)->arvore, nome, ingles, promove, proLista, NULL);
+                    insere(&(*uni)->arvore, nome, ingles, promove, &proLista, NULL);
                     proLista = NULL;
                     j = 0;
                 }
             }
             nome[j] = '\0';
-            insere(&(*uni)->arvore, nome, ingles, promove, proLista, NULL);
+            insere(&(*uni)->arvore, nome, ingles, promove, &proLista, NULL);
             proLista = NULL;
         }
         fscanf(fptr, "%s", palavras);

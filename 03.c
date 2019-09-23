@@ -49,6 +49,7 @@ int procuraPalavra(arv *uni, char *p);
 void main(){
     arv *no;
     cap *uni = NULL, **aux;
+    aux=(cap**)malloc(sizeof(cap*));
     int choice, certo;
     char procura[100], arq[100], unidade[100];
     clock_t inicio, fim;
