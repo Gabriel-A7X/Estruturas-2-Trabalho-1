@@ -16,7 +16,7 @@ void mostraPreOrdem(No *raiz);
 No* rotacaoEsquerda(No *a);
 No* rotacaoDireita(No *a);
 No* balancear(No *h);
-void trocaCor(No *h);
+void trocaCor(No **h);
 int cor(No *h);
 int consulta(No *raiz, int valor);
 void insereNo(No **raiz, No *no);
@@ -38,6 +38,7 @@ void main(){
             sort = (rand() % 1000) + 1;
             no = criaNo(sort);
             insereNo(&raiz, no);
+            raiz->cor = 1;
         }
         fim = (long double)clock();
         long double tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
@@ -75,8 +76,9 @@ No* rotacaoEsquerda(No *a){
     No *b = a->dir;
     a->dir = b->esq;
     b->esq = a;
+    int cor = a->cor;
     a->cor = b->cor;
-    b->cor = 0;
+    b->cor = cor;
     return b;
 }
 
@@ -84,8 +86,9 @@ No* rotacaoDireita(No *a){
     No *b = a->esq;
     a->esq = b->dir;
     b->dir = a;
+    int cor = b->cor;
     b->cor = a->cor;
-    a->cor = 0;
+    a->cor = cor;
     return b;
 }
 
@@ -98,29 +101,18 @@ int cor(No *h){
     return c;
 }
 
-void trocaCor(No *h){
-    h->cor = 1 - h->cor;
-    if(h->esq != NULL){
-        h->esq->cor = 1 - h->esq->cor;
+void trocaCor(No **h){
+    (*h)->cor = 1 - (*h)->cor;
+    if((*h)->esq != NULL){
+        (*h)->esq->cor = 1 - (*h)->esq->cor;
     }
-    if(h->dir != NULL){
-        h->dir->cor = 1 - h->dir->cor;
+    if((*h)->dir != NULL){
+        (*h)->dir->cor = 1 - (*h)->dir->cor;
     }
 }
 
 No* balancear(No *h){
-    //Nó vermelho é sempre filho da esquerda.
-    if(cor(h->dir) == 0 && cor(h->esq) == 1){
-        h = rotacaoEsquerda(h);
-    }
-    //Filho da direita e neto esquerda são vermelhos.
-    if(h->esq != NULL && cor(h->esq) == 0 && cor(h->esq->esq) == 0){
-        h = rotacaoDireita(h);
-    }
-    //2 filhos vermelhos troca cor.
-    if(cor(h->esq) == 0 && cor(h->dir) == 0){
-        trocaCor(h);
-    }
+   
     return h;
 }
 
@@ -145,7 +137,18 @@ void insereNo(No **raiz, No *no){
         }else if(no->info > (*raiz)->info){
             insereNo(&(*raiz)->dir, no);
         }
-        *raiz = balancear(*raiz);
+        //Nó vermelho é sempre filho da esquerda.
+        if(cor((*raiz)->dir) == 0 && cor((*raiz)->esq) == 1){
+            *raiz = rotacaoEsquerda(*raiz);
+        }
+        //Filho da direita e neto esquerda são vermelhos.
+        if((*raiz)->esq != NULL && cor((*raiz)->esq) == 0 && cor(((*raiz)->esq)->esq) == 0){
+            *raiz = rotacaoDireita(*raiz);
+        }
+        //2 filhos vermelhos troca cor.
+        if(cor((*raiz)->esq) == 0 && cor((*raiz)->dir) == 0){
+            trocaCor(raiz);
+        }
     }else{
         *raiz = no;
     }
