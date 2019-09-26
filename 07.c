@@ -3,21 +3,21 @@
 #include <time.h>
 
 struct No{
-    int altura, inicio, fim, enderecoInicio, enderecoFim;
+    int altura, enderecoInicio, enderecoFim;
     char status;
     struct No *esq, *dir;
 };
 
 typedef struct No No;
 
-No* criaNo(int *status, int inicio, int fim,int enderecoInicio, int enderecoFim);
+No* criaNo(int *status, int enderecoInicio, int enderecoFim);
 void rotacaoRR(No** raiz);
-void insere(No** raiz, No* Novo);
+void insere(No** raiz, No* Novo, int fim);
 void mostra(No* raiz);
 int maior(int a, int b);
 int altNo(No* raiz);
-int alocar(No** raiz, No** pai, int qtdBlocos, int *status);
-int liberar(No** raiz, No** pai, int qtdBlocos, int* status);
+int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim);
+int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim);
 int buscaAloca(No* raiz, int valor);
 int buscaLibera(No* raiz, int valor);
 
@@ -32,80 +32,63 @@ int main(){
 	while(1==1){
 		printf("1-Criar Arvore\n2-Mostra Arvore\n3-Alocar No\n4-Liberar No\n0-Sair\n");
 		scanf("%d", &choice);
+        int fim;
 		switch(choice){
 			case 1:
 				free(raiz);
 				raiz = NULL;
+                printf("Digite a quantidade de blocos em MBs: ");
+				scanf("%d", &fim);
 				printf("Insira como esta o primeiro bloco (1-Ocupado 0-Livre)\n");
 				scanf("%d", &status);
-				int inicio, fim;
-				printf("Insira o endereço incial: ");
-				scanf("%d", &inicio);
-				printf("Insira o endereço final: ");
-				scanf("%d", &fim);
-
 				int auxinicio=0, auxfim=0, cont=0;
 
 				while(auxfim < fim){
-					printf("Insira o endereço[%d] incial: ",cont);
+					printf("Insira o %d endereço incial: ",cont);
 					scanf("%d", &auxinicio);
-					printf("Insira o endereço[%d] final: ", cont++);
+					printf("Insira o %d endereço final: ", cont++);
 					scanf("%d", &auxfim);
-					insere(&raiz, criaNo(&status, inicio,fim,auxinicio,auxfim));
+					insere(&raiz, criaNo(&status, auxinicio,auxfim), fim);
 				}
 				break;
 			case 2:
 				mostra(raiz);
 				break;
-			case 3:
-				
-				printf("Digite a quantidade de blocos para Alocar: ");
+			case 3:	
+				printf("Digite a quantidade de blocos para alocar: ");
 				int auxalocar;
 				scanf("%d", &auxalocar);
-
-
 				tempoBuscaI = clock();
 				int procuraAloc = buscaAloca(raiz, auxalocar);
 				tempoBuscaF = clock();
 				tempoBuscaDecorrido = (tempoBuscaF- tempoBuscaI) / (CLOCKS_PER_SEC/1000) ;
-				printf("Tempo gasto BUSCAR: %lf \n", tempoBuscaDecorrido);
-
-				
+				printf("Tempo de busca: %lf \n", tempoBuscaDecorrido);
 				tempoAlterarI = clock();
-				if( alocar(&raiz,NULL, auxalocar, &status) == 0)
+				if( alocar(&raiz,NULL, auxalocar, &status, fim) == 0)
 					printf("Espaço insuficiente [%d].\n", procuraAloc);
 				else
-					printf("Alocação bem sucedida [%d].\n", procuraAloc);
-				
+					printf("Alocação bem sucedida [%d].\n", procuraAloc);	
 				tempoAlterarF = clock();
 				tempoAlterarDecorrido = (tempoAlterarF-tempoAlterarI)/(CLOCKS_PER_SEC/1000);
-				printf("Tempo gasto ALTERAR: %lf \n", tempoBuscaDecorrido);
-
+				printf("Tempo de alterar %lf \n", tempoBuscaDecorrido);
 				break;
 			case 4:
-
-				printf("Quantidade de blocos para liberar: ");
+				printf("Digite a quantidade de blocos para liberar: ");
 				int auxliberar;
 				scanf("%d", &auxliberar);
-
 				tempoBuscaI = clock();
-				
 				int procuraLib = buscaLibera(raiz, auxliberar);
-
 				tempoBuscaF = clock();
 				tempoBuscaDecorrido = (tempoBuscaF- tempoBuscaI) / (CLOCKS_PER_SEC/1000) ;
-				printf("Tempo gasto BUSCAR: %lf \n", tempoBuscaDecorrido);
-				
-
+				printf("Tempo para buscar: %lf \n", tempoBuscaDecorrido);
 				tempoAlterarI = clock();
-				if( liberar(&raiz,NULL, auxliberar, &status) == 0)
-					printf("Espaço insuficiente [%d].\n", procuraLib);
+				if( liberar(&raiz,NULL, auxliberar, &status, fim) == 0)
+					printf("Espaço %d insuficiente.\n", procuraLib);
 				else
-					printf("Liberação bem sucedida [%d].\n", procuraLib);
-				
+					printf("Liberação %d bem sucedida.\n", procuraLib);
 				tempoAlterarF = clock();
 				tempoAlterarDecorrido = (tempoAlterarF-tempoAlterarI)/(CLOCKS_PER_SEC/1000);
-				printf("Tempo gasto ALTERAR: %lf \n", tempoBuscaDecorrido);
+				printf("Tempo para alterar: %lf \n", tempoBuscaDecorrido);
 				break;
 			case 0:
 				exit(0);
@@ -115,21 +98,19 @@ int main(){
 }
 
 
-No* criaNo(int *status, int inicio, int fim,int enderecoInicio, int enderecoFim){
-	No* No = (No*) malloc(sizeof(No));
-    No->altura = 0;
-	No->inicio = inicio;
-	No->fim = fim;
-	No->enderecoInicio = enderecoInicio;
-	No->enderecoFim = enderecoFim;
-    No->esq = NULL;
-	No->dir = NULL;
+No* criaNo(int *status, int enderecoInicio, int enderecoFim){
+	No* no = (No*) malloc(sizeof(No));
+    no->altura = 0;
+	no->enderecoInicio = enderecoInicio;
+	no->enderecoFim = enderecoFim;
+    no->esq = NULL;
+	no->dir = NULL;
 	if( *status == 0)
-		No->status = 'L';
+		no->status = 'L';
 	else
-		No->status = 'O';
+		no->status = 'O';
 	*status = 1- (*status);
-	return No;
+	return no;
 }
 
 int maior(int a, int b){
@@ -156,13 +137,13 @@ void rotacaoRR(No** raiz){
 	*raiz = aux;
 }
 
-void insere(No** raiz, No* Novo){
+void insere(No** raiz, No* Novo, int fim){
 	if(*raiz==NULL){
 		*raiz = Novo;
 	}else{
-		if( (*raiz)->fim >= Novo->enderecoInicio){
+		if(fim >= Novo->enderecoInicio){
 			if(Novo->enderecoInicio > (*raiz)->enderecoFim){
-				insere(&(*raiz)->dir, Novo);
+				insere(&(*raiz)->dir, Novo, fim);
 				if( abs( altNo((*raiz)->esq)-altNo((*raiz)->dir)) == 2)
 					rotacaoRR(raiz);
 			}
@@ -174,18 +155,18 @@ void insere(No** raiz, No* Novo){
 void mostra(No* raiz){
 	if( raiz != NULL){
 		mostra(raiz->esq);
-		printf("(%c) |%d-%d| |%d-%d|\n",raiz->status, raiz->inicio, raiz->fim, raiz->enderecoInicio, raiz->enderecoFim);
+		printf("Status: %c Inicio: %d - Fim: %d\n",raiz->status, raiz->enderecoInicio, raiz->enderecoFim);
 		mostra(raiz->dir);
 	}
 }
 
-int alocar(No** raiz, No** pai, int qtdBlocos, int *status){
+int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
 
 	//Resul 1 para alocação concluida
 	int resul = 0;
 
 	if( *raiz != NULL){
-		resul = alocar(&(*raiz)->esq,raiz, qtdBlocos, status);
+		resul = alocar(&(*raiz)->esq,raiz, qtdBlocos, status, fim);
 
 		if(resul == 0){
 			
@@ -204,7 +185,7 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status){
 
 						int newinicio = newfim+1;
 
-						insere(raiz, criaNo(status, (*raiz)->inicio,(*raiz)->fim,newinicio,auxfim));
+						insere(raiz, criaNo(status, newinicio,auxfim), fim);
 
 					}
 					resul = 1;
@@ -280,24 +261,24 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status){
 						resul = 1;
 					
 					}else{
-						resul = alocar(&(*raiz)->dir,raiz, qtdBlocos, status);
+						resul = alocar(&(*raiz)->dir,raiz, qtdBlocos, status, fim);
 					}	
 				}
 			}else{
-				resul = alocar(&(*raiz)->dir,raiz, qtdBlocos, status);
+				resul = alocar(&(*raiz)->dir,raiz, qtdBlocos, status, fim);
 			}
 		}
 	}
 	return resul;
 }
 
-int liberar(No** raiz, No** pai, int qtdBlocos, int* status){
+int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim){
 
 	//Resul 1 para alocação concluida
 	int resul = 0;
 
 	if( *raiz != NULL){
-		resul = liberar(&(*raiz)->esq,raiz, qtdBlocos, status);
+		resul = liberar(&(*raiz)->esq,raiz, qtdBlocos, status, fim);
 	
 		if(resul == 0){
 				
@@ -315,7 +296,7 @@ int liberar(No** raiz, No** pai, int qtdBlocos, int* status){
 
 						int newinicio = newfim+1;
 
-						insere(raiz, criaNo(status, (*raiz)->inicio,(*raiz)->fim,newinicio,auxfim));
+						insere(raiz, criaNo(status, newinicio,auxfim), fim);
 
 					}
 					resul = 1;
@@ -390,11 +371,11 @@ int liberar(No** raiz, No** pai, int qtdBlocos, int* status){
 						resul = 1;
 					
 					}else{
-						resul = liberar(&(*raiz)->dir,raiz, qtdBlocos, status);
+						resul = liberar(&(*raiz)->dir,raiz, qtdBlocos, status, fim);
 					}	
 				}
 			}else{
-				resul = liberar(&(*raiz)->dir,raiz, qtdBlocos, status);
+				resul = liberar(&(*raiz)->dir,raiz, qtdBlocos, status, fim);
 			}
 		}
 	}
