@@ -72,7 +72,7 @@ int main(){
             inicio = (long double)clock();
             lerArquivo(arq, &uni);
             fim = (long double)clock();
-            tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+            tempo = ((long double)(fim - inicio)*1000.0/CLOCKS_PER_SEC);
             printf("Tempo de insercao %Lf\n", tempo);
             break;
         case 2:
@@ -108,7 +108,7 @@ int main(){
             inicio = (long double)clock();
             *aux = procuraUnidade(uni, unidade, &certo);
             fim = (long double)clock();
-            tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+            tempo = ((long double)(fim - inicio)*1000.0/CLOCKS_PER_SEC);
             printf("Tempo de busca da unidade %Lf\n", tempo);
             if(certo == 1){
                 printf("Digite o nome da palavra:\n");
@@ -121,7 +121,7 @@ int main(){
                     printf("Palavra nao encontrada!\n");
                 }
                 fim = (long double)clock();
-                tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+                tempo = ((long double)(fim - inicio)*1000.0/CLOCKS_PER_SEC);
                 printf("Tempo de busca da palavra %Lf\n", tempo);
              }
             break;
@@ -628,12 +628,10 @@ int remove23(arv **raiz, char *pal, arv **pai){
 
 cap* procuraUnidade(cap *uni, char *p, int *certo){
     cap *aux=uni;
-    for(uni; aux != NULL; aux=aux->prox){
-        if(strcmp(aux->unidade, p) == 0){
-            *certo = 1;
-            break;
-        }
+    for(uni;( aux != NULL && strcmp(aux->unidade, p) != 0); aux=aux->prox){
+
     }
+    *certo = (aux != NULL)?1:0;    
     return aux;
 }
 
