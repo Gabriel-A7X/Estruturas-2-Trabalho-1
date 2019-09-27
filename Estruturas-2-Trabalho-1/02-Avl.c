@@ -29,7 +29,7 @@ void main(){
     No *raiz = NULL, *no;
     int i, j, sort, procura = (rand() % 1000) + 1, *difProf, maisProf, menosProf;
     clock_t inicio, fim;
-    difProf = (int*) calloc(sizeof(int), 40);
+    difProf = (int*) calloc(sizeof(int), 100);
     for(i=0; i<30; i++){
         inicio = (long double)clock();
         for(j=0; j<1000; j++){
@@ -38,7 +38,7 @@ void main(){
             insere(&raiz, no);
         }
         fim = (long double)clock();
-        long double tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+        long double tempo = ((long double)(fim - inicio)*1000.0/CLOCKS_PER_SEC);
         maisProf = noMProf(raiz, 0);
         menosProf = noMenProf(raiz, 0);
         printf("Nível da folha mais profunda %d\nNível da folha menos profunda %d\n", maisProf, menosProf);
@@ -47,12 +47,12 @@ void main(){
         inicio = (long double)clock();
         busca(raiz, procura);
         fim = (long double)clock();
-        tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+        tempo = ((long double)(fim - inicio)*1000.0/CLOCKS_PER_SEC);
         printf("Tempo de busca %Lf\n", tempo);
         libera(&raiz);
     }
     printf("Diferencas entre profundidades maximas e minimas:\n");
-    for(i=0; i<40; i++){
+    for(i=0; i<100; i++){
         if(difProf[i] != 0){
             printf("A diferenca %d ocorreu %d.\n", i, difProf[i]);
         }

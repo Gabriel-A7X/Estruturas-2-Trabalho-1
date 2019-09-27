@@ -196,7 +196,7 @@ void LiberaNo(No **raiz, int qut, No *pai){
     int inicio;
     No *no;
     if(raiz != NULL){
-        if(efolha(*raiz)){
+        if(eFolha(*raiz)){
             if((*raiz)->ol == 'O' && (*raiz)->fim - (*raiz)->inicio >= qut){
                 if((*raiz)->inicio + qut == (*raiz)->fim){
                     pai->fim = (*raiz)->fim;
