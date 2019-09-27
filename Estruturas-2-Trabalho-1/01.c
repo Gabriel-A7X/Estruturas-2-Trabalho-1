@@ -4,14 +4,13 @@
 #include <unistd.h>
 
 struct no{
-    int info, altura;
+    int info;
     struct no *esq, *dir;
 };
 
 typedef struct no No;
 
 No *criarNo(int n);
-int altNo(No *raiz);
 void insere(No **raiz, No *no);
 void mostraPreOrdem(No *raiz);
 int maior(int a, int b);
@@ -60,7 +59,6 @@ void main(){
 No *criarNo(int n){
     No *no = (No*) malloc(sizeof(No));
     no->info = n;
-    no->altura = 0;
     no->dir = NULL;
     no->esq = NULL;
     return no;
@@ -92,15 +90,6 @@ int menor(int a, int b){
     return men;
 }
 
-int altNo(No *raiz){
-    int alt;
-    if(raiz == NULL){
-        alt = -1;
-    }else{
-        alt = raiz->altura;
-    }
-    return alt;
-}
 
 void insere(No **raiz, No *no){
     if(*raiz == NULL){
@@ -111,7 +100,6 @@ void insere(No **raiz, No *no){
         }else{
             insere(&(*raiz)->dir, no);
         }
-        (*raiz)->altura = maior(altNo((*raiz)->esq), (altNo((*raiz)->dir))) + 1;
     }
 }
 
