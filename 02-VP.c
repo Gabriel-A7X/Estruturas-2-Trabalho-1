@@ -33,8 +33,13 @@ void main(){
     difProf = (int*) calloc(sizeof(int), 10000);
     for(i=0; i<30; i++){
         inicio = (long double)clock();
+<<<<<<< HEAD
         for(j=0; j<100000; j++){
             sort = (rand() % 100000) + 1;
+=======
+        for(j=0; j<1000000; j++){
+            sort = (rand() % 1000) + 1;
+>>>>>>> 978d06a825f2a92a10dca13ab1afb4930d8a807b
             no = criaNo(sort);
             insereNo(&raiz, no);
             raiz->cor = 1;
