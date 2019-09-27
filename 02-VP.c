@@ -15,7 +15,6 @@ int eFolha(No *no);
 void mostraPreOrdem(No *raiz);
 No* rotacaoEsquerda(No *a);
 No* rotacaoDireita(No *a);
-No* balancear(No *h);
 void trocaCor(No **h);
 int cor(No *h);
 int consulta(No *raiz, int valor);
@@ -29,19 +28,19 @@ void libera(No **raiz);
 void main(){
     srand(time(NULL));
     No *raiz = NULL, *no;
-    int i, j, sort, procura = (rand() % 1000) + 1, *difProf, maisProf, menosProf;
+    int i, j, sort, procura = (rand() % 100000) + 1, *difProf, maisProf, menosProf;
     clock_t inicio, fim;
-    difProf = (int*) calloc(sizeof(int), 100);
+    difProf = (int*) calloc(sizeof(int), 10000);
     for(i=0; i<30; i++){
         inicio = (long double)clock();
-        for(j=0; j<1000; j++){
-            sort = (rand() % 1000) + 1;
+        for(j=0; j<100000; j++){
+            sort = (rand() % 100000) + 1;
             no = criaNo(sort);
             insereNo(&raiz, no);
             raiz->cor = 1;
         }
         fim = (long double)clock();
-        long double tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+        long double tempo = ((long double)(fim - inicio)*1000.0/CLOCKS_PER_SEC);
         maisProf = noMProf(raiz, 0);
         menosProf = noMenProf(raiz, 0);
         printf("Nível da folha mais profunda %d\nNível da folha menos profunda %d\n", maisProf, menosProf);
@@ -50,13 +49,13 @@ void main(){
         inicio = (long double)clock();
         consulta(raiz, procura);
         fim = (long double)clock();
-        tempo = ((fim - inicio)/((long double)CLOCKS_PER_SEC/1000.0));
+        tempo = ((long double)(fim - inicio)*1000.0/CLOCKS_PER_SEC);
         printf("Tempo de busca %Lf\n", tempo);
 	libera(&raiz);
 	raiz=NULL;
     }
     printf("Diferencas entre profundidades maximas e minimas:\n");
-    for(i=0; i<100; i++){
+    for(i=0; i<10000; i++){
         if(difProf[i] != 0){
             printf("A diferenca %d ocorreu %d.\n", i, difProf[i]);
         }
@@ -109,11 +108,6 @@ void trocaCor(No **h){
     if((*h)->dir != NULL){
         (*h)->dir->cor = 1 - (*h)->dir->cor;
     }
-}
-
-No* balancear(No *h){
-   
-    return h;
 }
 
 int consulta(No *raiz, int valor){
