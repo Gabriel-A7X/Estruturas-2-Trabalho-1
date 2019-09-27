@@ -10,11 +10,13 @@ struct No{
 
 typedef struct No No;
 
+int menu();
 No* criaNo(int *status, int enderecoInicio, int enderecoFim);
 void rotacaoRR(No** raiz);
 void insere(No** raiz, No* Novo, int fim);
 void mostra(No* raiz);
 int maior(int a, int b);
+int eFolha(No *no);
 int altNo(No* raiz);
 int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim);
 int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim);
@@ -24,15 +26,12 @@ int buscaLibera(No* raiz, int valor);
 
 int main(){
 	No* raiz = NULL;
-    // 1 para ocupado e 0 para livre.
-	int  status=0, choice;
+	int  status=0, choice, fim;
 	clock_t tempoBuscaI, tempoBuscaF;
 	clock_t tempoAlterarI, tempoAlterarF;
 	float tempoBuscaDecorrido, tempoAlterarDecorrido;
-	while(1==1){
-		printf("1-Criar Arvore\n2-Mostra Arvore\n3-Alocar No\n4-Liberar No\n0-Sair\n");
-		scanf("%d", &choice);
-        int fim;
+	do{
+		choice = menu();
 		switch(choice){
 			case 1:
 				free(raiz);
@@ -42,11 +41,10 @@ int main(){
 				printf("Insira como esta o primeiro bloco (1-Ocupado 0-Livre)\n");
 				scanf("%d", &status);
 				int auxinicio=0, auxfim=0, cont=0;
-
 				while(auxfim < fim){
-					printf("Insira o %d endereço incial: ",cont);
+					printf("Insira o endereço incial: ");
 					scanf("%d", &auxinicio);
-					printf("Insira o %d endereço final: ", cont++);
+					printf("Insira o endereço final: ");
 					scanf("%d", &auxfim);
 					insere(&raiz, criaNo(&status, auxinicio,auxfim), fim);
 				}
@@ -61,15 +59,15 @@ int main(){
 				tempoBuscaI = clock();
 				int procuraAloc = buscaAloca(raiz, auxalocar);
 				tempoBuscaF = clock();
-				tempoBuscaDecorrido = (tempoBuscaF- tempoBuscaI) / (CLOCKS_PER_SEC/1000) ;
+				tempoBuscaDecorrido = ((long double)(tempoBuscaF- tempoBuscaI)*1000.0/CLOCKS_PER_SEC);
 				printf("Tempo de busca: %lf \n", tempoBuscaDecorrido);
 				tempoAlterarI = clock();
 				if( alocar(&raiz,NULL, auxalocar, &status, fim) == 0)
-					printf("Espaço insuficiente [%d].\n", procuraAloc);
+					printf("Espaço insuficiente.\n", procuraAloc);
 				else
-					printf("Alocação bem sucedida [%d].\n", procuraAloc);	
+					printf("Alocação bem sucedida.\n", procuraAloc);	
 				tempoAlterarF = clock();
-				tempoAlterarDecorrido = (tempoAlterarF-tempoAlterarI)/(CLOCKS_PER_SEC/1000);
+				tempoAlterarDecorrido = ((long double)(tempoAlterarF- tempoAlterarI)*1000.0/CLOCKS_PER_SEC);
 				printf("Tempo de alterar %lf \n", tempoBuscaDecorrido);
 				break;
 			case 4:
@@ -79,7 +77,7 @@ int main(){
 				tempoBuscaI = clock();
 				int procuraLib = buscaLibera(raiz, auxliberar);
 				tempoBuscaF = clock();
-				tempoBuscaDecorrido = (tempoBuscaF- tempoBuscaI) / (CLOCKS_PER_SEC/1000) ;
+				tempoBuscaDecorrido = ((long double)(tempoBuscaF- tempoBuscaI)*1000.0/CLOCKS_PER_SEC);
 				printf("Tempo para buscar: %lf \n", tempoBuscaDecorrido);
 				tempoAlterarI = clock();
 				if( liberar(&raiz,NULL, auxliberar, &status, fim) == 0)
@@ -87,16 +85,22 @@ int main(){
 				else
 					printf("Liberação %d bem sucedida.\n", procuraLib);
 				tempoAlterarF = clock();
-				tempoAlterarDecorrido = (tempoAlterarF-tempoAlterarI)/(CLOCKS_PER_SEC/1000);
+				tempoAlterarDecorrido = ((long double)(tempoAlterarF- tempoAlterarI)*1000.0/CLOCKS_PER_SEC);
 				printf("Tempo para alterar: %lf \n", tempoBuscaDecorrido);
 				break;
 			case 0:
-				exit(0);
+				break;
 		}
-	}
+	}while(choice != 0);
     return 0;
 }
 
+int menu(){
+	int choice;
+	printf("1-Criar Arvore\n2-Mostra Arvore\n3-Alocar No\n4-Liberar No\n0-Sair\n");
+	scanf("%d", &choice);
+	return choice;
+}
 
 No* criaNo(int *status, int enderecoInicio, int enderecoFim){
 	No* no = (No*) malloc(sizeof(No));
@@ -114,9 +118,21 @@ No* criaNo(int *status, int enderecoInicio, int enderecoFim){
 }
 
 int maior(int a, int b){
-	if(a>b)
-		return a;
-	return b;
+	 int mai;
+    if(a > b){
+        mai = a;
+    }else{
+        mai = b;
+    }
+    return mai;
+}
+
+int eFolha(No *no){
+    int ret = 0;
+    if((no->esq == NULL) && (no->dir == NULL)){
+        ret = 1;
+    }
+    return ret;
 }
 
 int altNo(No* raiz){
@@ -161,20 +177,13 @@ void mostra(No* raiz){
 }
 
 int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
-
-	//Resul 1 para alocação concluida
 	int resul = 0;
-
 	if( *raiz != NULL){
 		resul = alocar(&(*raiz)->esq,raiz, qtdBlocos, status, fim);
-
 		if(resul == 0){
-			
 			if((*raiz)->status == 'L'){
-				int qtdLocal = (*raiz)->enderecoFim - (*raiz)->enderecoInicio +1;
-				
-				if( pai == NULL && (*raiz)->esq == NULL && (*raiz)->dir == NULL){		//apenas um nó
-					
+				int qtdLocal = (*raiz)->enderecoFim - (*raiz)->enderecoInicio + 1;
+				if( pai == NULL && (*raiz)->esq == NULL && (*raiz)->dir == NULL){
 					if(qtdLocal == qtdBlocos){
 						(*raiz)->status = 'O';
                         *status = 1 - (*status);
@@ -182,16 +191,12 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
 						int newfim = (*raiz)->enderecoFim - qtdBlocos;
 						int auxfim = (*raiz)->enderecoFim;
 						(*raiz)->enderecoFim = newfim;
-
 						int newinicio = newfim+1;
-
 						insere(raiz, criaNo(status, newinicio,auxfim), fim);
-
 					}
 					resul = 1;
-				}else if((*raiz)->esq == NULL && (*raiz)->dir == NULL){
+				}else if(eFolha(*raiz)){
 					if(qtdLocal == qtdBlocos){
-						//Buscar os mais interNos para unir;
 						int newfim = (*pai)->enderecoFim + qtdBlocos;
 						(*pai)->enderecoFim = newfim;
 						free(*raiz);
@@ -212,8 +217,6 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
 						resul = 1;
 					}
 				}else{
-			
-					//Buscando o mais a esquerda Ocupado.
 					No** paiMaisEsq = raiz;
 					No** maisEsq = &((*raiz)->dir);
 					while((*maisEsq)->esq != NULL){
@@ -222,12 +225,8 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
 					}
 					if((*paiMaisEsq)->status == 'O'){
 						maisEsq = paiMaisEsq;
-					}
-					//free(*paiMaisEsq);		
-					
+					}		
 					if(qtdLocal == qtdBlocos){
-
-						//Buscando o mais a direita Ocupado.
 						No** paiMaisDir = raiz;
 						No** maisDir = &((*raiz)->esq);
 						while((*maisDir)->dir != NULL){
@@ -237,17 +236,11 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
 						if((*paiMaisDir)->status == 'O'){
 							maisDir = paiMaisDir;
 						}
-						//free(*paiMaisDir);
-						
-						
-						//Buscar os mais interNos para unir;
 						int newinicio = (*maisDir)->enderecoInicio;
 						int newfim = (*maisEsq)->enderecoFim;
 						(*raiz)->enderecoInicio = newinicio;
 						(*raiz)->enderecoFim = newfim;
 						(*raiz)->status = 'O';
-
-						
 						free(*maisDir);
 						free(*maisEsq);
 						*maisDir = NULL;
@@ -258,8 +251,7 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
 						int newinicio = (*maisEsq)->enderecoInicio - qtdBlocos;
 						(*raiz)->enderecoFim = newfim;
 						(*maisEsq)->enderecoInicio = newinicio;
-						resul = 1;
-					
+						resul = 1;					
 					}else{
 						resul = alocar(&(*raiz)->dir,raiz, qtdBlocos, status, fim);
 					}	
@@ -273,36 +265,26 @@ int alocar(No** raiz, No** pai, int qtdBlocos, int *status, int fim){
 }
 
 int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim){
-
-	//Resul 1 para alocação concluida
 	int resul = 0;
-
 	if( *raiz != NULL){
 		resul = liberar(&(*raiz)->esq,raiz, qtdBlocos, status, fim);
-	
 		if(resul == 0){
-				
 			if((*raiz)->status == 'O'){
 				int qtdLocal = (*raiz)->enderecoFim - (*raiz)->enderecoInicio +1;
-				
 				if( pai == NULL && (*raiz)->esq == NULL && (*raiz)->dir == NULL){
-					
 					if(qtdLocal == qtdBlocos){
 						(*raiz)->status = 'L';
+						*status = 1 - (*status);
 					}else{
 						int newfim = (*raiz)->enderecoFim - qtdBlocos;
 						int auxfim = (*raiz)->enderecoFim;
 						(*raiz)->enderecoFim = newfim;
-
 						int newinicio = newfim+1;
-
 						insere(raiz, criaNo(status, newinicio,auxfim), fim);
-
 					}
 					resul = 1;
 				}else if((*raiz)->dir == NULL){
 					if(qtdLocal == qtdBlocos){
-						//Buscar os mais interNos para unir;
 						int newfim = (*pai)->enderecoFim + qtdBlocos;
 						(*pai)->enderecoFim = newfim;
 						free(*raiz);
@@ -323,8 +305,6 @@ int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim){
 						resul = 1;
 					}
 				}else{
-			
-					//Buscando o mais a esquerda Ocupado.
 					No** paiMaisEsq = raiz;
 					No** maisEsq = &((*raiz)->dir);
 					while((*maisEsq)->esq != NULL){
@@ -334,11 +314,7 @@ int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim){
 					if((*paiMaisEsq)->status == 'L'){
 						maisEsq = paiMaisEsq;
 					}
-					//free(*paiMaisEsq);		
-					
 					if(qtdLocal == qtdBlocos){
-
-						//Buscando o mais a direita Ocupado.
 						No** paiMaisDir = raiz;
 						No** maisDir = &((*raiz)->esq);
 						while((*maisDir)->dir != NULL){
@@ -348,16 +324,11 @@ int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim){
 						if((*paiMaisDir)->status == 'L'){
 							maisDir = paiMaisDir;
 						}
-						//free(*paiMaisDir);
-	
-						//Buscar os mais interNos para unir;
 						int newinicio = (*maisDir)->enderecoInicio;
 						int newfim = (*maisEsq)->enderecoFim;
 						(*raiz)->enderecoInicio = newinicio;
 						(*raiz)->enderecoFim = newfim;
 						(*raiz)->status = 'L';
-
-						
 						free(*maisDir);
 						free(*maisEsq);
 						*maisDir = NULL;
@@ -369,7 +340,6 @@ int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim){
 						(*raiz)->enderecoFim = newfim;
 						(*maisEsq)->enderecoInicio = newinicio;
 						resul = 1;
-					
 					}else{
 						resul = liberar(&(*raiz)->dir,raiz, qtdBlocos, status, fim);
 					}	
@@ -384,7 +354,6 @@ int liberar(No** raiz, No** pai, int qtdBlocos, int* status, int fim){
 
 int buscaAloca(No* raiz, int valor){
 	int procura = 0;
-
 	if(raiz != NULL){
 		procura = buscaAloca(raiz->esq, valor);
 		if((raiz)->status == 'L'){
@@ -402,7 +371,6 @@ int buscaAloca(No* raiz, int valor){
 
 int buscaLibera(No* raiz, int valor){
 	int procura = 0;
-
 	if(raiz != NULL){
 		procura = buscaLibera(raiz->esq, valor);
 		if((raiz)->status == 'L'){
@@ -417,4 +385,3 @@ int buscaLibera(No* raiz, int valor){
 	}
 	return procura;
 }
-
